@@ -1,4 +1,4 @@
-# yii2-files-module
+# yii2-sitemap
 
 Site Map generator module for the [Yii2](http://www.yiiframework.ru/) framework
 
