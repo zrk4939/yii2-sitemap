@@ -1,0 +1,27 @@
+{
+  "name": "zrk4939/yii2-sitemap",
+  "type": "yii2-extension",
+  "description": "Sitemap Module",
+  "keywords": [
+    "yii2",
+    "extension"
+  ],
+  "authors": [
+    {
+      "name": "Ilya Youshketov",
+      "email": "zrk4939@gmail.com"
+    },
+    {
+      "name": "b2ik",
+      "email": "nik.chernyh@gmail.com"
+    }
+  ],
+  "require": {
+    "yiisoft/yii2": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "zrk4939\\modules\\sitemap\\": ""
+    }
+  }
+}
