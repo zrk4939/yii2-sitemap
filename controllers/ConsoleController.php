@@ -29,10 +29,11 @@ class ConsoleController extends Controller
         $module = Yii::$app->getModule('sitemap');
         $savePath = $module->storePath;
         $sitemaps = $module->sitemaps;
+        $baseUrl = $module->baseUrl;
         /* @var $component SiteMapComponent */
         $component = Yii::createObject([
             'class' => 'zrk4939\modules\sitemap\components\SiteMapComponent',
-            'baseUrl' => 'http://navigator.dev',
+            'baseUrl' => $baseUrl,
             'sitemaps' => $sitemaps,
 
         ]);

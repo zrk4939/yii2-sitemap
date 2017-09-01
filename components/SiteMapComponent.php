@@ -53,7 +53,7 @@ class SiteMapComponent extends Object
                     $childQuery = clone $sitemap['childsQuery'];
                     $linkChild = current(array_keys($sitemap['childLink']));
                     $linkModel = current($sitemap['childLink']);
-                    $childQuery->andWhere([$linkChild => $model->getAttribute($linkModel)])->limit(10);
+                    $childQuery->andWhere([$linkChild => $model->getAttribute($linkModel)]);
 
                     $childModels = $this->getModels($childQuery);
                     $childPages = $this->addModels($childModels);

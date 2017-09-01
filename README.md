@@ -26,6 +26,7 @@ to the repositories array of your `composer.json` file.
 ```php
  'sitemap' => [
              'class' => 'zrk4939\modules\sitemap\Module',
+             'baseUrl' => 'http://example.com',
              'sitemaps' => [
                  [
                      'query' => \namespace\to\CategoryModel::find(),
@@ -39,4 +40,14 @@ to the repositories array of your `composer.json` file.
                  ],
              ]
          ],
+```
+
+### UrlManager rule
+```
+'<name:^sitemap([-0-9a-zA-Z_]+)?.xml>' => 'sitemap/default/sitemap',
+```
+
+### console
+```
+$ php yii sitemap/console/create
 ```

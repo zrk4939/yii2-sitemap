@@ -15,6 +15,7 @@ class Module extends \yii\base\Module
     public $controllerNamespace = 'zrk4939\modules\sitemap\controllers';
     public $storePath;
     public $sitemaps = [];
+    public $baseUrl;
 
     /**
      * @inheritdoc
