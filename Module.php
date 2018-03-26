@@ -16,6 +16,7 @@ class Module extends \yii\base\Module
      */
     public $controllerNamespace = 'zrk4939\modules\sitemap\controllers';
     public $storePath = '@runtime/sitemap';
+    public $divideCounts = false;
     public $sitemaps = [];
     public $baseUrl;
 
@@ -61,10 +62,15 @@ class Module extends \yii\base\Module
                     $childModels = $this->getModels($childQuery);
                     $childPages = $this->addModels($childModels);
 
-                    foreach (array_chunk($childPages, 100) as $i => $chunk) {
-                        $mapFilePostfix = Inflector::slug($model->getAttribute('name')) . '_' . $i;
-                        $mapLink = $this->createPagesSiteMap($childPages, $this->storePath, $mapFilePostfix);
+                    $mapFilePostfix = Inflector::slug($model->getAttribute('name'));
 
+                    if ($this->divideCounts) {
+                        foreach (array_chunk($childPages, $this->divideCounts) as $i => $chunk) {
+                            $mapLink = $this->createPagesSiteMap($childPages, $this->storePath, $mapFilePostfix . '_' . $i);
+                            $this->populateSitemapLoc($mapLink);
+                        }
+                    } else {
+                        $mapLink = $this->createPagesSiteMap($childPages, $this->storePath, $mapFilePostfix);
                         $this->populateSitemapLoc($mapLink);
                     }
                 }
