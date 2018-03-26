@@ -17,12 +17,13 @@ class DefaultController extends Controller
 
     public function actionSitemap($name)
     {
+        /** @var \zrk4939\modules\sitemap\Module $module */
         $module = Yii::$app->getModule('sitemap');
-        $savePath   = $module->storePath;
-        if(file_exists($savePath . '/'. $name)){
+        $savePath = $module->storePath;
+        if (file_exists($savePath . '/' . $name)) {
             Yii::$app->response->format = \yii\web\Response::FORMAT_XML;
             ob_start("ob_gzhandler");
-            echo file_get_contents($savePath . '/'. $name);
+            echo file_get_contents($savePath . '/' . $name);
             ob_end_flush();
             Yii::$app->end();
         }

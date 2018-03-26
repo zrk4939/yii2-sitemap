@@ -25,21 +25,44 @@ to the repositories array of your `composer.json` file.
 
 ```php
  'sitemap' => [
-             'class' => 'zrk4939\modules\sitemap\Module',
-             'baseUrl' => 'http://example.com',
-             'sitemaps' => [
-                 [
-                     'query' => \namespace\to\CategoryModel::find(),
-                     'postfix' => 'types',
-                     'childsQuery' => \namespace\to\ItemModel::find(),
-                     'childLink' => ['type_id' => 'id'],
-                 ],
-                 [
-                     'query' => \namespace\to\CategoryModel::find(),
-                     'postfix' => 'categories',
-                 ],
-             ]
+     'class' => 'zrk4939\modules\sitemap\Module',
+     'baseUrl' => 'http://example.com',
+     'urlManagerConfig' => [
+         'class' => 'yii\web\UrlManager',
+         'enablePrettyUrl' => true,
+         'showScriptName' => false,
+         'baseUrl' => 'http://example.com',
+         'rules' => [],
+     ],
+     'sitemaps' => [
+         [
+             'query' => \namespace\to\CategoryModel::find(),
+             'postfix' => 'types',
+             'childsQuery' => \namespace\to\ItemModel::find(),
+             'childLink' => ['type_id' => 'id'],
          ],
+         [
+             'query' => \namespace\to\SecondCategoryModel::find(),
+             'postfix' => 'categories',
+         ],
+     ]
+ ],
+```
+
+### AR MODEL
+Your model must be implemented and declared ::getSiteMapUrl method
+
+```php
+class ContentItem extends ActiveRecord implements SiteMapInterface{
+    ...
+    public function getSiteMapUrl($config = [])
+    {
+        /** @var yii\web\UrlManager $urlManager */
+        $urlManager = Yii::createObject($config);
+
+        return urldecode($urlManager->createAbsoluteUrl(['/content/default/index', 'url' => $this->slug], true));
+    }
+}
 ```
 
 ### UrlManager rule
