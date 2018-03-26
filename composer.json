@@ -2,10 +2,8 @@
   "name": "zrk4939/yii2-sitemap",
   "type": "yii2-extension",
   "description": "Sitemap Module",
-  "keywords": [
-    "yii2",
-    "extension"
-  ],
+  "license": "Unlicense",
+  "keywords": ["yii2", "extension", "sitemap"],
   "authors": [
     {
       "name": "Ilya Youshketov",
