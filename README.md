@@ -24,29 +24,42 @@ to the repositories array of your `composer.json` file.
 ### main.php
 
 ```php
+'components' => [
+        'cache' => [
+            'class' => 'yii\caching\FileCache', // Используем хранилище yii\caching\FileCache
+            'cachePath' => '@common/runtime/cache' // Храним кэш в common/runtime/cache
+        ],
+    ],
+
  'sitemap' => [
-     'class' => 'zrk4939\modules\sitemap\Module',
-     'baseUrl' => 'http://example.com',
-     'urlManagerConfig' => [
-         'class' => 'yii\web\UrlManager',
-         'enablePrettyUrl' => true,
-         'showScriptName' => false,
-         'baseUrl' => 'http://example.com',
-         'rules' => [],
-     ],
-     'sitemaps' => [
-         [
-             'query' => \namespace\to\CategoryModel::find(),
-             'postfix' => 'types',
-             'childsQuery' => \namespace\to\ItemModel::find(),
-             'childLink' => ['type_id' => 'id'],
-         ],
-         [
-             'query' => \namespace\to\SecondCategoryModel::find(),
-             'postfix' => 'categories',
-         ],
-     ]
- ],
+        'class' => 'zrk4939\modules\sitemap\Module',
+        'storePath' => '@frontend/runtime/sitemap',
+        'baseUrl' => $params['frontendUrl'],
+        'urlManagerConfig' => [
+            'class' => 'yii\web\UrlManager',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'baseUrl' => $params['frontendUrl'],
+            'rules' => require(dirname(__DIR__, 2) . '/frontend/config/urlRules.php'),
+        ],
+        'divideCounts' => 1000,
+        'sitemaps' => [
+            [
+                'query' => \domain\modules\content\models\ContentType::find(),
+                'postfix' => 'types',
+            ],
+            [
+                'query' => \domain\modules\content\models\ContentCategory::find(),
+                'postfix' => 'categories',
+            ],
+            [
+                'query' => \domain\modules\content\models\ContentItem::find(),
+                'postfix' => 'content-items',
+                'iterationLimit' => 1000,
+                'iterationCount' => \domain\modules\content\models\ContentItem::find()->asArray(),
+            ],
+        ]
+    ],
 ```
 
 ### AR MODEL
@@ -72,5 +85,6 @@ class ContentItem extends ActiveRecord implements SiteMapInterface{
 
 ### console
 ```
-$ php yii sitemap/console/create
+$ php yii sitemap/console/create //создание sitemap.xml
+$ php yii sitemap/console/cleaning //очиска кеш
 ```
