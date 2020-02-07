@@ -23,14 +23,36 @@ class ConsoleController extends Controller
 {
     public function actionCreate()
     {
-        echo "start creating sitemaps...\n";
+        $cache = Yii::$app->cache;
+        $key = 'iterationDate';
+        $iterationDate = $cache->get($key);
 
-        /* @var $module \zrk4939\modules\sitemap\Module */
-        $module = Yii::$app->getModule('sitemap');
+        if ($iterationDate === false || $iterationDate < date('H')) {
 
-        $module->createSiteMap();
+            echo "start creating sitemaps...\n";
 
-        echo "Done!!\n";
+            /* @var $module \zrk4939\modules\sitemap\Module */
+            $module = Yii::$app->getModule('sitemap');
+
+            $module->createSiteMap();
+
+            echo "Done!!\n";
+
+            $iterationDate = date('H');
+            $cache->set($key, $iterationDate);
+
+            exit;
+        }
+        echo "Данные обновлялись не меньше часа назад ...\n";
+        exit;
+    }
+
+    public function actionCleaning()
+    {
+        Yii::$app->cache->flush();
+
+        echo "Вы очистили кэш \n";
+
         exit;
     }
 }
