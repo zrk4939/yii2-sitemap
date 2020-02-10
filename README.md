@@ -56,7 +56,6 @@ to the repositories array of your `composer.json` file.
                 'query' => \domain\modules\content\models\ContentItem::find(),
                 'postfix' => 'content-items',
                 'iterationLimit' => 1000,
-                'iterationCount' => \domain\modules\content\models\ContentItem::find()->asArray(),
             ],
         ]
     ],
