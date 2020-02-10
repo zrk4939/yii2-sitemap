@@ -54,7 +54,7 @@ class Module extends \yii\base\Module
 
                 $interationOffset = 0;
 
-                $iterationCount = (count($this->getModels($sitemap['iterationCount']))); //определение общего количество записей
+                $iterationCount = (count($this->getModelCount($sitemap['query']))); //определение общего количество записей
                 $iterationCount = $iterationCount / $sitemap['iterationLimit']; //определение количества итерраций
 
                 for ($i = 0; $i < $iterationCount; $i++) :
@@ -201,6 +201,16 @@ class Module extends \yii\base\Module
     {
 
         return $query->all();
+    }
+
+    /**
+     * @param ActiveQuery $query
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getModelCount(ActiveQuery $query)
+    {
+
+        return $query->count();
     }
 
     /**
