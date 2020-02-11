@@ -22,6 +22,8 @@ class Module extends \yii\base\Module
 
     public $urlManagerConfig = [];
 
+    public $changefreq = self::FREQ_HOURLY;
+
     const FREQ_ALWAYS = 'always';
     const FREQ_HOURLY = 'hourly';
     const FREQ_DAILY = 'daily';
@@ -48,35 +50,35 @@ class Module extends \yii\base\Module
     public function createSiteMap()
     {
         foreach ($this->sitemaps as $sitemap) {
-            $models = $this->getModels($sitemap['query']);
-            $pages = $this->addModels($models);
-            $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
+            if (!empty($sitemap['iterationLimit'])) {
 
-            if (key_exists('childsQuery', $sitemap)) {
-                foreach ($models as $model) {
-                    $childQuery = clone $sitemap['childsQuery'];
-                    $linkChild = current(array_keys($sitemap['childLink']));
-                    $linkModel = current($sitemap['childLink']);
-                    $childQuery->andWhere([$linkChild => $model->getAttribute($linkModel)]);
+                $interationOffset = 0;
 
-                    $childModels = $this->getModels($childQuery);
-                    $childPages = $this->addModels($childModels);
+                $iterationCount = ($this->getModelCount($sitemap['query'])); //определение общего количество записей
+                $iterationCount = $iterationCount / $sitemap['iterationLimit']; //определение количества итерраций
 
-                    $mapFilePostfix = Inflector::slug($model->getAttribute('name'));
+                for ($i = 0; $i < $iterationCount; $i++) :
 
-                    if ($this->divideCounts) {
-                        foreach (array_chunk($childPages, $this->divideCounts) as $i => $chunk) {
-                            $mapLink = $this->createPagesSiteMap($childPages, $this->storePath, $mapFilePostfix . '_' . $i);
-                            $this->populateSitemapLoc($mapLink);
-                        }
-                    } else {
-                        $mapLink = $this->createPagesSiteMap($childPages, $this->storePath, $mapFilePostfix);
-                        $this->populateSitemapLoc($mapLink);
-                    }
-                }
+                    $models = $this->getModelsLimit($sitemap['query'], $sitemap['iterationLimit'], $interationOffset);
+                    $pages = $this->addModels($models);
+                    $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix'] . '_' . $i);
+                    $this->populateSitemapLoc($mapLink);
+                    ($interationOffset === 0) ? $interationOffset = $sitemap['iterationLimit'] + 1 : $interationOffset = $interationOffset + $sitemap['iterationLimit'];
+
+                endfor;
+
+            } else {
+
+                $models = $this->getModels($sitemap['query']);
+                $pages = $this->addModels($models);
+                $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
+
+                $this->populateSitemapLoc($mapLink);
+
+
             }
 
-            $this->populateSitemapLoc($mapLink);
+
         }
 
         $this->createSitemapIndex($this->storePath);
@@ -97,11 +99,13 @@ class Module extends \yii\base\Module
      * @param int $priority
      * @return array
      */
-    private function addModels(array $models, string $changeFreq = self::FREQ_DAILY, int $priority = 1)
+    private function addModels(array $models, string $changeFreq = self::FREQ_HOURLY, int $priority = 1)
     {
         $pages = [];
 
         foreach ($models as $model) {
+            /** @var SiteMapInterface $model */
+
             $page = [
                 'loc' => $model->getSiteMapUrl($this->urlManagerConfig),
                 'changefreq' => $changeFreq,
@@ -195,6 +199,26 @@ class Module extends \yii\base\Module
      */
     protected function getModels(ActiveQuery $query)
     {
+
         return $query->all();
+    }
+    
+    /**
+     * @param ActiveQuery $query
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getModelCount(ActiveQuery $query)
+    {
+
+        return $query->count();
+    }
+
+    /**
+     * @param ActiveQuery $query
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getModelsLimit(ActiveQuery $query, $iterationLimit, $interationOffset)
+    {
+        return $query->offset($interationOffset)->limit($iterationLimit)->all();
     }
 }
