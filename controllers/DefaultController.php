@@ -8,9 +8,11 @@
 
 namespace zrk4939\modules\sitemap\controllers;
 
+use DOMDocument;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class DefaultController extends Controller
 {
@@ -21,11 +23,13 @@ class DefaultController extends Controller
         $module = Yii::$app->getModule('sitemap');
         $savePath = $module->storePath;
         if (file_exists($savePath . '/' . $name)) {
-            Yii::$app->response->format = \yii\web\Response::FORMAT_XML;
-            ob_start("ob_gzhandler");
-            echo file_get_contents($savePath . '/' . $name);
-            ob_end_flush();
-            Yii::$app->end();
+            Yii::$app->response->format = Response::FORMAT_RAW;
+            $headers = Yii::$app->response->headers;
+            $headers->add('Content-Type', 'text/xml');
+
+            $doc = new DOMDocument();
+            $doc->load($savePath . '/' . $name);
+            return $doc->saveXML();
         }
 
         throw new NotFoundHttpException('File not found!');
