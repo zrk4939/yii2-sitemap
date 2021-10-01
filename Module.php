@@ -55,18 +55,16 @@ class Module extends \yii\base\Module
                 $interationOffset = 0;
 
                 $iterationCount = ($this->getModelCount($sitemap['query'])); //определение общего количество записей
-                $iterationCount = $iterationCount / $sitemap['iterationLimit']; //определение количества итерраций
+                $iterationCount = ceil((int)$iterationCount / (int)$sitemap['iterationLimit']); //определение количества итерраций
 
-                for ($i = 0; $i < $iterationCount; $i++) :
-
+                for ($i = 0; $i < $iterationCount; $i++) {
                     $models = $this->getModelsLimit($sitemap['query'], $sitemap['iterationLimit'], $interationOffset);
                     $pages = $this->addModels($models);
                     $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix'] . '_' . $i);
                     $this->populateSitemapLoc($mapLink);
-                    ($interationOffset === 0) ? $interationOffset = $sitemap['iterationLimit'] + 1 : $interationOffset = $interationOffset + $sitemap['iterationLimit'];
 
-                endfor;
-
+                    $interationOffset += $sitemap['iterationLimit'];
+                }
             } else {
 
                 $models = $this->getModels($sitemap['query']);
@@ -202,7 +200,7 @@ class Module extends \yii\base\Module
 
         return $query->all();
     }
-    
+
     /**
      * @param ActiveQuery $query
      * @return array|\yii\db\ActiveRecord[]
