@@ -16,7 +16,6 @@ class Module extends \yii\base\Module
      */
     public $controllerNamespace = 'zrk4939\modules\sitemap\controllers';
     public $storePath = '@runtime/sitemap';
-    public $divideCounts = false;
     public $sitemaps = [];
     public $baseUrl;
 
@@ -31,6 +30,8 @@ class Module extends \yii\base\Module
     const FREQ_MONTHLY = 'monthly';
     const FREQ_YEARLY = 'yearly';
     const FREQ_NEVER = 'never';
+
+    const MAX_COUNT = 100;
 
     private $_sitemaps;
 
@@ -47,36 +48,17 @@ class Module extends \yii\base\Module
         // custom initialization code goes here
     }
 
+    /**
+     *
+     */
     public function createSiteMap()
     {
         foreach ($this->sitemaps as $sitemap) {
-            if (!empty($sitemap['iterationLimit'])) {
+            $models = $this->getModels($sitemap['query']);
+            $pages = $this->addModels($models, $this->changefreq);
+            $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
 
-                $interationOffset = 0;
-
-                $iterationCount = ($this->getModelCount($sitemap['query'])); //определение общего количество записей
-                $iterationCount = ceil((int)$iterationCount / (int)$sitemap['iterationLimit']); //определение количества итерраций
-
-                for ($i = 0; $i < $iterationCount; $i++) {
-                    $models = $this->getModelsLimit($sitemap['query'], $sitemap['iterationLimit'], $interationOffset);
-                    $pages = $this->addModels($models);
-                    $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix'] . '_' . $i);
-                    $this->populateSitemapLoc($mapLink);
-
-                    $interationOffset += $sitemap['iterationLimit'];
-                }
-            } else {
-
-                $models = $this->getModels($sitemap['query']);
-                $pages = $this->addModels($models);
-                $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
-
-                $this->populateSitemapLoc($mapLink);
-
-
-            }
-
-
+            $this->populateSitemapLoc($mapLink);
         }
 
         $this->createSitemapIndex($this->storePath);
@@ -181,6 +163,16 @@ class Module extends \yii\base\Module
     }
 
     /**
+     * @param ActiveQuery $query
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected function getModels(ActiveQuery $query)
+    {
+
+        return $query->limit(self::MAX_COUNT)->all();
+    }
+
+    /**
      * @param string $locUrl
      */
     private function populateSitemapLoc($locUrl)
@@ -189,34 +181,5 @@ class Module extends \yii\base\Module
             'loc' => $locUrl,
             'lastmod' => $this->dateToW3C(time())
         ];
-    }
-
-    /**
-     * @param ActiveQuery $query
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    protected function getModels(ActiveQuery $query)
-    {
-
-        return $query->all();
-    }
-
-    /**
-     * @param ActiveQuery $query
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    protected function getModelCount(ActiveQuery $query)
-    {
-
-        return $query->count();
-    }
-
-    /**
-     * @param ActiveQuery $query
-     * @return array|\yii\db\ActiveRecord[]
-     */
-    protected function getModelsLimit(ActiveQuery $query, $iterationLimit, $interationOffset)
-    {
-        return $query->offset($interationOffset)->limit($iterationLimit)->all();
     }
 }
