@@ -22,7 +22,9 @@ class Module extends \yii\base\Module
     public $urlManagerConfig = [];
 
     public $changefreq = self::FREQ_HOURLY;
-
+	
+	public $maxCount = 100;
+	
     const FREQ_ALWAYS = 'always';
     const FREQ_HOURLY = 'hourly';
     const FREQ_DAILY = 'daily';
@@ -30,8 +32,6 @@ class Module extends \yii\base\Module
     const FREQ_MONTHLY = 'monthly';
     const FREQ_YEARLY = 'yearly';
     const FREQ_NEVER = 'never';
-
-    const MAX_COUNT = 100;
 
     private $_sitemaps;
 
@@ -169,7 +169,7 @@ class Module extends \yii\base\Module
     protected function getModels(ActiveQuery $query)
     {
 
-        return $query->limit(self::MAX_COUNT)->all();
+        return $query->limit($this->maxCount)->all();
     }
 
     /**
