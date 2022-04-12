@@ -170,7 +170,7 @@ class Module extends \yii\base\Module
     protected function getModels(ActiveQuery $query, $limit)
     {
 
-        return $query->limit($limit)->all();
+        return $query->limit($limit)->asArray()->all();
     }
 
     /**
