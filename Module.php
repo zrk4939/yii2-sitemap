@@ -22,8 +22,7 @@ class Module extends \yii\base\Module
     public $urlManagerConfig = [];
 
     public $changefreq = self::FREQ_HOURLY;
-	
-	public $maxCount = 100;
+
 	
     const FREQ_ALWAYS = 'always';
     const FREQ_HOURLY = 'hourly';
@@ -54,7 +53,8 @@ class Module extends \yii\base\Module
     public function createSiteMap()
     {
         foreach ($this->sitemaps as $sitemap) {
-            $models = $this->getModels($sitemap['query']);
+            $limit = isset($sitemap['maxCount']) ? $sitemap['maxCount'] : null;
+            $models = $this->getModels($sitemap['query'], $limit);
             $pages = $this->addModels($models, $this->changefreq);
             $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
 
@@ -164,12 +164,13 @@ class Module extends \yii\base\Module
 
     /**
      * @param ActiveQuery $query
+     * @param int|null $limit
      * @return array|\yii\db\ActiveRecord[]
      */
-    protected function getModels(ActiveQuery $query)
+    protected function getModels(ActiveQuery $query, $limit)
     {
 
-        return $query->limit($this->maxCount)->all();
+        return $query->limit($limit)->all();
     }
 
     /**
