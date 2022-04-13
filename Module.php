@@ -19,12 +19,9 @@ class Module extends \yii\base\Module
     public $sitemaps = [];
     public $baseUrl;
 
-    public $urlManagerConfig = [];
 
     public $changefreq = self::FREQ_HOURLY;
-	
-	public $maxCount = 100;
-	
+
     const FREQ_ALWAYS = 'always';
     const FREQ_HOURLY = 'hourly';
     const FREQ_DAILY = 'daily';
@@ -55,7 +52,7 @@ class Module extends \yii\base\Module
     {
         foreach ($this->sitemaps as $sitemap) {
             $models = $this->getModels($sitemap['query']);
-            $pages = $this->addModels($models, $this->changefreq);
+            $pages = $this->addModels($models, $this->changefreq, 1, $sitemap['url']);
             $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
 
             $this->populateSitemapLoc($mapLink);
@@ -77,23 +74,23 @@ class Module extends \yii\base\Module
      * @param array $models
      * @param string $changeFreq
      * @param int $priority
+     * @param callable $callable
      * @return array
      */
-    private function addModels(array $models, string $changeFreq = self::FREQ_HOURLY, int $priority = 1)
+    private function addModels(array $models, string $changeFreq = self::FREQ_HOURLY, int $priority = 1, $callable)
     {
         $pages = [];
 
         foreach ($models as $model) {
-            /** @var SiteMapInterface $model */
 
             $page = [
-                'loc' => $model->getSiteMapUrl($this->urlManagerConfig),
+                'loc' => call_user_func_array($callable, array($this->baseUrl, $model)),
                 'changefreq' => $changeFreq,
                 'priority' => $priority
             ];
 
-            if ($model->hasAttribute('updated_at')) {
-                $page['lastmod'] = $this->dateToW3C($model->updated_at);
+            if (isset($model['updated_at'])) {
+                $page['lastmod'] = $this->dateToW3C($model['updated_at']);
             }
 
             $pages[] = $page;
@@ -169,7 +166,7 @@ class Module extends \yii\base\Module
     protected function getModels(ActiveQuery $query)
     {
 
-        return $query->limit($this->maxCount)->all();
+        return $query->all();
     }
 
     /**
