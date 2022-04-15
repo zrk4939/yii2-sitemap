@@ -108,7 +108,7 @@ class Module extends \yii\base\Module
             ];
 
             if (isset($model['updated_at'])) {
-                $page['lastmod'] = $this->dateToW3C($model['updated_at']);
+                $page['lastmod'] = date(DATE_W3C, (int) $model['updated_at']);
             }
 
             $pages[] = $page;
