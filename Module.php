@@ -19,6 +19,12 @@ class Module extends \yii\base\Module
     public $sitemaps = [];
     public $baseUrl;
 
+    /**
+     * Максимально допустимое кол-во элементов в одном файле
+     * @var int $maxRestriction
+     */
+    public $maxRestriction = 10000;
+
 
     public $changefreq = self::FREQ_HOURLY;
 
@@ -52,10 +58,22 @@ class Module extends \yii\base\Module
     {
         foreach ($this->sitemaps as $sitemap) {
             $models = $this->getModels($sitemap['query']);
-            $pages = $this->addModels($models, $this->changefreq, 1, $sitemap['url']);
-            $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
+            $count = count($models);
+            if ($count > $this->maxRestriction) {
+                $addPostfix = 0;
+                for ($i = 0; $i < $count; $i += $this->maxRestriction) {
+                    $articles = array_slice($models, $i, $this->maxRestriction, true);
+                    $pages = $this->addModels($articles, $this->changefreq, 1, $sitemap['url']);
+                    $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix'] . "_{$addPostfix}");
+                    $this->populateSitemapLoc($mapLink);
+                    $addPostfix++;
+                }
+            } else {
+                $pages = $this->addModels($models, $this->changefreq, 1, $sitemap['url']);
+                $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
+                $this->populateSitemapLoc($mapLink);
+            }
 
-            $this->populateSitemapLoc($mapLink);
         }
 
         $this->createSitemapIndex($this->storePath);
