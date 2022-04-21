@@ -17,7 +17,6 @@ class Module extends \yii\base\Module
     public $controllerNamespace = 'zrk4939\modules\sitemap\controllers';
     public $storePath = '@runtime/sitemap';
     public $sitemaps = [];
-    public $baseUrl;
 
     /**
      * Максимально допустимое кол-во элементов в одном файле
@@ -102,7 +101,7 @@ class Module extends \yii\base\Module
         foreach ($models as $model) {
 
             $page = [
-                'loc' => call_user_func_array($callable, array($this->baseUrl, $model)),
+                'loc' => call_user_func_array($callable, array($model)),
                 'changefreq' => $changeFreq,
                 'priority' => $priority
             ];
@@ -147,7 +146,7 @@ class Module extends \yii\base\Module
 
         $dom->appendChild($urlset);
         $dom->save($path . '/sitemap_' . $postfix . '.xml');
-        $mapUrl = $this->baseUrl . '/sitemap_' . $postfix . '.xml';
+        $mapUrl = \yii\helpers\Url::toRoute(  '/sitemap_' . $postfix . '.xml');
 
         echo "$mapUrl was be created!\n";
 
