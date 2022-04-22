@@ -21,6 +21,20 @@ to the repositories array of your `composer.json` file.
 
 ## Usage
 
+### console/config/main-local.php
+
+```php
+'components' => [
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'scriptUrl' => '',
+            'baseUrl' => 'http://yii2.local',
+        ],
+    ],
+```
+
+
 ### main.php
 
 ```php
@@ -32,50 +46,27 @@ to the repositories array of your `composer.json` file.
     ],
 
  'sitemap' => [
-        'class' => 'zrk4939\modules\sitemap\Module',
-        'storePath' => '@frontend/runtime/sitemap',
-        'baseUrl' => $params['frontendUrl'],
-        'urlManagerConfig' => [
-            'class' => 'yii\web\UrlManager',
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'baseUrl' => $params['frontendUrl'],
-            'rules' => require(dirname(__DIR__, 2) . '/frontend/config/urlRules.php'),
-        ],
-        'divideCounts' => 1000,
-        'sitemaps' => [
-            [
-                'query' => \domain\modules\content\models\ContentType::find(),
-                'postfix' => 'types',
-            ],
-            [
-                'query' => \domain\modules\content\models\ContentCategory::find(),
-                'postfix' => 'categories',
-            ],
-            [
-                'query' => \domain\modules\content\models\ContentItem::find(),
-                'postfix' => 'content-items',
-                'iterationLimit' => 1000,
+		'class' => 'zrk4939\modules\sitemap\Module',
+		'storePath' => '@frontend/runtime/sitemap',
+		'sitemaps' => [
+			[
+				'query' => ArticlesRubrics::find()->asArray(),
+				'postfix' => 'types',
+				'url' => function($model) {
+					return \yii\helpers\Url::toRoute("/{$model['type']}");
+				}
+			],
+			[
+				'query' => Pages::find()->active()->orderBy(['id' => SORT_DESC])->limit(300),
+				'postfix' => 'pages',
+				'url' => function($model) {
+					return \yii\helpers\Url::toRoute("/{$model['link']}");
+				}
             ],
         ]
     ],
 ```
 
-### AR MODEL
-Your model must be implemented and declared ::getSiteMapUrl method
-
-```php
-class ContentItem extends ActiveRecord implements SiteMapInterface{
-    ...
-    public function getSiteMapUrl($config = [])
-    {
-        /** @var yii\web\UrlManager $urlManager */
-        $urlManager = Yii::createObject($config);
-
-        return urldecode($urlManager->createAbsoluteUrl(['/content/default/index', 'url' => $this->slug], true));
-    }
-}
-```
 
 ### UrlManager rule
 ```
