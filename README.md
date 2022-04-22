@@ -67,21 +67,6 @@ to the repositories array of your `composer.json` file.
     ],
 ```
 
-### AR MODEL
-Your model must be implemented and declared ::getSiteMapUrl method
-
-```php
-class ContentItem extends ActiveRecord implements SiteMapInterface{
-    ...
-    public function getSiteMapUrl($config = [])
-    {
-        /** @var yii\web\UrlManager $urlManager */
-        $urlManager = Yii::createObject($config);
-
-        return urldecode($urlManager->createAbsoluteUrl(['/content/default/index', 'url' => $this->slug], true));
-    }
-}
-```
 
 ### UrlManager rule
 ```
