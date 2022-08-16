@@ -4,6 +4,7 @@ namespace zrk4939\modules\sitemap;
 
 use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Inflector;
 
 /**
@@ -51,7 +52,7 @@ class Module extends \yii\base\Module
     }
 
     /**
-     *
+     * TODO documentation
      */
     public function createSiteMap()
     {
@@ -62,13 +63,13 @@ class Module extends \yii\base\Module
                 $addPostfix = 0;
                 for ($i = 0; $i < $count; $i += $this->maxRestriction) {
                     $articles = array_slice($models, $i, $this->maxRestriction, true);
-                    $pages = $this->addModels($articles, $this->changefreq, 1, $sitemap['url']);
+                    $pages = $this->addModels($articles, $this->changefreq, 1, $sitemap['url'], ArrayHelper::getValue($sitemap, 'lastmod'));
                     $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix'] . "_{$addPostfix}");
                     $this->populateSitemapLoc($mapLink);
                     $addPostfix++;
                 }
             } else {
-                $pages = $this->addModels($models, $this->changefreq, 1, $sitemap['url']);
+                $pages = $this->addModels($models, $this->changefreq, 1, $sitemap['url'], ArrayHelper::getValue($sitemap, 'lastmod'));
                 $mapLink = $this->createPagesSiteMap($pages, $this->storePath, $sitemap['postfix']);
                 $this->populateSitemapLoc($mapLink);
             }
@@ -91,23 +92,25 @@ class Module extends \yii\base\Module
      * @param array $models
      * @param string $changeFreq
      * @param int $priority
-     * @param callable $callable
+     * @param callable|string $urlAttr
+     * @param callable|string $lastModAttr
      * @return array
      */
-    private function addModels(array $models, string $changeFreq = self::FREQ_HOURLY, int $priority = 1, $callable)
+    private function addModels(array $models, string $changeFreq = self::FREQ_HOURLY, int $priority = 1, $urlAttr, $lastModAttr)
     {
         $pages = [];
 
         foreach ($models as $model) {
-
+            $loc = is_callable($urlAttr) ? call_user_func_array($urlAttr, array($model)) : $model[$urlAttr];
             $page = [
-                'loc' => call_user_func_array($callable, array($model)),
+                'loc' => $loc,
                 'changefreq' => $changeFreq,
                 'priority' => $priority
             ];
 
-            if (isset($model['updated_at'])) {
-                $page['lastmod'] = date(DATE_W3C, (int) $model['updated_at']);
+            if (!empty($lastModAttr)){
+                $lastMod = is_callable($lastModAttr) ? call_user_func_array($lastModAttr, array($model)) : $model[$lastModAttr];
+                $page['lastmod'] = date(DATE_W3C, (int) $lastMod);
             }
 
             $pages[] = $page;
