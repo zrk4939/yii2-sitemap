@@ -108,9 +108,9 @@ class Module extends \yii\base\Module
                 'priority' => $priority
             ];
 
-            if (!empty($lastModAttr)){
+            if (!empty($lastModAttr)) {
                 $lastMod = is_callable($lastModAttr) ? call_user_func_array($lastModAttr, array($model)) : $model[$lastModAttr];
-                $page['lastmod'] = date(DATE_W3C, (int) $lastMod);
+                $page['lastmod'] = date(DATE_W3C, (int)$lastMod);
             }
 
             $pages[] = $page;
@@ -149,7 +149,7 @@ class Module extends \yii\base\Module
 
         $dom->appendChild($urlset);
         $dom->save($path . '/sitemap_' . $postfix . '.xml');
-        $mapUrl = \yii\helpers\Url::toRoute(  '/sitemap_' . $postfix . '.xml');
+        $mapUrl = \yii\helpers\Url::toRoute('/sitemap_' . $postfix . '.xml');
 
         echo "$mapUrl was be created!\n";
 
@@ -185,8 +185,23 @@ class Module extends \yii\base\Module
      */
     protected function getModels(ActiveQuery $query)
     {
+        $result = [];
+        $totalCount = $query->count();
+        $step = 10000;
+        $processed = 0;
 
-        return $query->all();
+        while ($processed < $totalCount) {
+            $result = array_merge($result, $this->getModelsParts($query, $processed, $step));
+
+            $processed += $step;
+        }
+
+        return $result;
+    }
+
+    protected function getModelsParts(ActiveQuery $query, $offset = 0, $limit = 10000)
+    {
+        return $query->limit($limit)->offset($offset)->all();
     }
 
     /**
